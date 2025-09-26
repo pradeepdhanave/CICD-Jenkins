@@ -29,8 +29,8 @@ pipeline {
         stage('Deploy & Restart') {
             steps {
                 // Restart the application using the correct PM2 command
-                // The CWD is set to the app directory to ensure 'node_modules' is found.
-                sh "pm2 restart express-app || pm2 start ./express-frontend/server.js --name express-app --interpreter node --cwd ./express-frontend"
+                // NOTE: The 'start' command now uses 'server.js' because CWD is set to './express-frontend'
+                sh "pm2 restart express-app || pm2 start server.js --name express-app --interpreter node --cwd ./express-frontend"
                 echo 'Express app deployment complete and process restarted.'
             }
         }
