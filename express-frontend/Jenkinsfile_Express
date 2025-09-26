@@ -1,20 +1,21 @@
 pipeline {
+    //RUN THIS PIPELINE ON THE REMOTE APPLICATION SERVER
     agent { label 'application-server' }
 
     tools {
-        // Uses the NodeJS tool configured in Jenkins
+        // Uses the NodeJS tool configured in Jenkins (must be configured on the agent, too)
         nodejs 'NodeJS_20' 
     }
     
     environment {
-        // Path to the application directory relative to the Jenkins workspace root
         APP_DIR = 'express-frontend'
+        PM2_BIN = 'pm2' // Assuming PM2 is now in the PATH on the agent machine
     }
 
     stages {
         stage('Checkout Code') {
             steps {
-                // Clones the entire single repository
+                // Clones the entire single repository into the agent workspace
                 git branch: 'main', credentialsId: 'YOUR_GIT_CREDENTIAL_ID', url: 'https://github.com/pradeepdhanave/CICD-Jenkins.git' 
             }
         }
@@ -28,11 +29,11 @@ pipeline {
 
         stage('Deploy & Restart') {
             steps {
-                // Restart the application using the correct PM2 command
-                // NOTE: The 'start' command now uses 'server.js' because CWD is set to './express-frontend'
-                sh "pm2 restart express-app || pm2 start server.js --name express-app --interpreter node --cwd ./express-frontend"
+                // Restart the application using the PM2 binary.
+                // The 'start' command uses 'server.js' and sets the CWD to the app directory.
+                sh "${PM2_BIN} restart express-app || ${PM2_BIN} start server.js --name express-app --interpreter node --cwd ./${APP_DIR}"
                 echo 'Express app deployment complete and process restarted.'
             }
         }
-   }
+    }
 }

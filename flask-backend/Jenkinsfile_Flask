@@ -1,42 +1,35 @@
 pipeline {
+    //RUN THIS PIPELINE ON THE REMOTE APPLICATION SERVER
     agent { label 'application-server' }
 
     environment {
-        // Path to the application directory relative to the Jenkins workspace root
         APP_DIR = 'flask-backend'
-        // Path to the Python VENV (created inside APP_DIR) relative to the Jenkins workspace root
-        VENV_PYTHON = 'flask-backend/venv/bin/python' 
+        PM2_BIN = 'pm2' // Assuming PM2 is now in the PATH on the agent machine
     }
 
     stages {
         stage('Checkout Code') {
             steps {
-                // Clones the entire single repository
-                git branch: 'main', credentialsId: 'YOUR_GIT_CREDENTIAL_ID', url: 'https://github.com/pradeepdhanave/CICD-Jenkins.git' 
+                // Clones the entire single repository into the agent workspace
+                git branch: 'main', credentialsId: 'YOUR_GIT_CREDENTIAL_ID', url: 'https://github.com/pradeepdhanave/CICD-Jenkins.git'
             }
         }
-        
+
         stage('Setup Environment & Install Dependencies') {
             steps {
-                sh """
-                # Navigate to the application directory to perform venv operations
-                cd ${APP_DIR}
-                
-                # 1. Create the virtual environment if it doesn't exist
-                python3 -m venv venv || echo "Venv already exists"
-                
-                # 2. Install dependencies using the VENV pip
-                ./venv/bin/python -m pip install --upgrade pip
-                ./venv/bin/python -m pip install -r requirements.txt
-                """
+                // Navigate to the app directory
+                sh "cd ${APP_DIR} && python3 -m venv venv"
+                // Install dependencies into the virtual environment
+                sh "cd ${APP_DIR} && ./venv/bin/python -m pip install --upgrade pip"
+                sh "cd ${APP_DIR} && ./venv/bin/python -m pip install -r requirements.txt"
             }
         }
-        
+
         stage('Deploy & Restart') {
             steps {
-                // Restart using the PM2 app name created in Part 1
-                // We use the full path to the VENV python and the app.py script from the workspace root.
-                sh "pm2 restart flask-app || pm2 start ./${VENV_PYTHON} --name flask-app -- ./flask-backend/app.py"
+                // Restart the application using the PM2 binary.
+                // The logical OR (||) ensures that if the app is not found, it starts it new.
+                sh "${PM2_BIN} restart flask-app || ${PM2_BIN} start ./${APP_DIR}/venv/bin/python --name flask-app -- ./${APP_DIR}/app.py"
                 echo 'Flask app deployment complete and process restarted.'
             }
         }
