@@ -2,12 +2,12 @@ pipeline {
     agent any
 
     tools {
-        // Uses the NodeJS tool configured in Jenkins (Name must match what you configured)
+        // Uses the NodeJS tool configured in Jenkins
         nodejs 'NodeJS_20' 
     }
     
     environment {
-        # Path to the application directory relative to the Jenkins workspace root
+        // Path to the application directory relative to the Jenkins workspace root
         APP_DIR = 'express-frontend'
     }
 
@@ -29,7 +29,7 @@ pipeline {
         stage('Deploy & Restart') {
             steps {
                 // Restart the application using the correct PM2 command
-                # The CWD is set to the app directory to ensure 'node_modules' is found.
+                // The CWD is set to the app directory to ensure 'node_modules' is found.
                 sh "pm2 restart express-app || pm2 start ./express-frontend/server.js --name express-app --interpreter node --cwd ./express-frontend"
                 echo 'Express app deployment complete and process restarted.'
             }
