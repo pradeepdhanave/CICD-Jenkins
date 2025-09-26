@@ -8,8 +8,8 @@ app = Flask(__name__)
 def api_status():
     return jsonify({
         "service": "Flask Backend",
-        "message": "Hello from the Flask API!",
-        "version": "1.2" to "1.3",
+        "message": "First Hello from the Flask API!",
+        "version": "1" to "2",
         "hostname": os.uname()[1]
     })
 
