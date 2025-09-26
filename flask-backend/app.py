@@ -9,7 +9,7 @@ def api_status():
     return jsonify({
         "service": "Flask Backend",
         "message": "First Hello from the Flask API!",
-        "version": "2"
+        "version": "1.1",
         "hostname": os.uname()[1]
     })
 
