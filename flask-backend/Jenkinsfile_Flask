@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent { label 'application-server' }
 
     environment {
         // Path to the application directory relative to the Jenkins workspace root
